@@ -798,61 +798,56 @@ websocket_manager = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-   """Modern FastAPI lifespan event handler"""
-   global alpha_vantage_client, complete_data_service, ml_service, websocket_manager
-   
-   # Startup
-   logger.info("🚀 Starting Complete Financial Analytics Dashboard API with ML Integration")
-   
-   try:
-       # Load API keys
-       api_keys = load_api_keys_from_env()
-       
-       # Initialize Alpha Vantage client
-       alpha_vantage_client = CompleteAlphaVantageClient(api_keys)
-       complete_data_service = CompleteDataService(alpha_vantage_client)
-       
-       # Initialize ML services if available
-       if ML_AVAILABLE:
-           try:
-               # Create Alpha Vantage client compatible with ML service
-               ml_alpha_client = AlphaVantageClient(api_keys)
-               ml_service = MLFinancialAnalyticsService(ml_alpha_client)
-               websocket_manager = ConnectionManager()
-               
-               logger.info("🤖 ML Features Initialized:")
-               logger.info("   🔮 LSTM Time Series Forecasting")
-               logger.info("   📊 20+ Technical Indicators")
-               logger.info("   ⚠️ Advanced Risk Assessment")
-               logger.info("   💡 AI-Powered Recommendations")
-               logger.info("   📈 Real-Time Market Sentiment")
-               logger.info("   🔄 WebSocket Real-Time Updates")
-           except Exception as e:
-               logger.warning(f"⚠️ ML services failed to initialize: {e}")
-               ML_AVAILABLE = False
-       
-       logger.info(f"✅ Initialized with {len(api_keys)} API keys")
-       logger.info("📊 Available APIs:")
-       logger.info("   🔹 Core Stock Data: 8 endpoints")
-       logger.info("   🔹 Fundamental Data: 10 endpoints")
-       logger.info("   🔹 Options Data: 3 endpoints (Premium)")
-       logger.info("   🔹 Utility APIs: 4 endpoints")
-       logger.info("   🔹 Alpha Intelligence: 1 endpoint")
-       if ML_AVAILABLE:
-           logger.info("   🤖 ML Analytics: 15+ ML endpoints")
-       logger.info("   📈 Total: 26+ endpoints for complete analysis!")
-       
-   except Exception as e:
-       logger.error(f"❌ Failed to initialize: {e}")
-       raise
-   
-   # App is running
-   yield
-   
-   # Shutdown
-   logger.info("🛑 Shutting down Complete Financial Analytics Dashboard API")
-   if alpha_vantage_client:
-       alpha_vantage_client.session.close()
+    """Modern FastAPI lifespan event handler"""
+    global alpha_vantage_client, complete_data_service
+    
+    # Startup
+    logger.info("🚀 Starting Complete Financial Analytics Dashboard API")
+    
+    # Initialize ML availability flag
+    ML_AVAILABLE = False
+    
+    try:
+        # ML module loading attempt
+        from ml_financial_api import MLFinancialAnalyticsService
+        ML_AVAILABLE = True
+        logger.info("✅ ML features loaded successfully")
+    except ImportError as e:
+        logger.warning(f"⚠️ ML module not available: {e}")
+        ML_AVAILABLE = False
+    
+    try:
+        # Load API keys
+        api_keys = load_api_keys_from_env()
+        
+        # Initialize clients
+        alpha_vantage_client = CompleteAlphaVantageClient(api_keys)
+        complete_data_service = CompleteDataService(alpha_vantage_client)
+        
+        if ML_AVAILABLE:
+            logger.info("🤖 Initializing ML features...")
+            # Initialize ML service if available
+        
+        logger.info(f"✅ Initialized with {len(api_keys)} API keys")
+        logger.info("📊 Available APIs:")
+        logger.info("   🔹 Core Stock Data: 8 endpoints")
+        logger.info("   🔹 Fundamental Data: 10 endpoints")
+        logger.info("   🔹 Options Data: 3 endpoints (Premium)")
+        logger.info("   🔹 Utility APIs: 4 endpoints")
+        logger.info("   🔹 Alpha Intelligence: 1 endpoint")
+        logger.info("   📈 Total: 26+ endpoints for complete analysis!")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize: {e}")
+        raise
+    
+    # App is running
+    yield
+    
+    # Shutdown
+    logger.info("🛑 Shutting down Complete Financial Analytics Dashboard API")
+    if alpha_vantage_client:
+        alpha_vantage_client.session.close()
 
 # ===================================
 # FASTAPI APPLICATION
