@@ -799,22 +799,13 @@ websocket_manager = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Modern FastAPI lifespan event handler"""
+    # Suppress unused parameter warning
+    _ = app
+    
     global alpha_vantage_client, complete_data_service
     
     # Startup
     logger.info("🚀 Starting Complete Financial Analytics Dashboard API")
-    
-    # Initialize ML availability flag
-    ML_AVAILABLE = False
-    
-    try:
-        # ML module loading attempt
-        from ml_financial_api import MLFinancialAnalyticsService
-        ML_AVAILABLE = True
-        logger.info("✅ ML features loaded successfully")
-    except ImportError as e:
-        logger.warning(f"⚠️ ML module not available: {e}")
-        ML_AVAILABLE = False
     
     try:
         # Load API keys
@@ -823,10 +814,6 @@ async def lifespan(app: FastAPI):
         # Initialize clients
         alpha_vantage_client = CompleteAlphaVantageClient(api_keys)
         complete_data_service = CompleteDataService(alpha_vantage_client)
-        
-        if ML_AVAILABLE:
-            logger.info("🤖 Initializing ML features...")
-            # Initialize ML service if available
         
         logger.info(f"✅ Initialized with {len(api_keys)} API keys")
         logger.info("📊 Available APIs:")
@@ -848,7 +835,6 @@ async def lifespan(app: FastAPI):
     logger.info("🛑 Shutting down Complete Financial Analytics Dashboard API")
     if alpha_vantage_client:
         alpha_vantage_client.session.close()
-
 # ===================================
 # FASTAPI APPLICATION
 # ===================================
@@ -1960,3 +1946,4 @@ if __name__ == "__main__":
        reload=True,
        log_level="info"
    )
+
