@@ -7,8 +7,8 @@ python-dotenv==1.0.0
 pydantic>=2.6.0
 python-multipart==0.0.6
 
-# Machine Learning Dependencies (Python 3.13 compatible)
-tensorflow-cpu>=2.15.0
+# Machine Learning Dependencies (Python 3.11 compatible)
+tensorflow==2.15.0
 scikit-learn>=1.3.0
 ta>=0.10.2
 numpy>=1.24.0
